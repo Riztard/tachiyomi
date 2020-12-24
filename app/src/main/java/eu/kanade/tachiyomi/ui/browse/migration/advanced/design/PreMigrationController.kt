@@ -127,11 +127,14 @@ class PreMigrationController(bundle: Bundle? = null) :
      */
     private fun getEnabledSources(): List<HttpSource> {
         val languages = prefs.enabledLanguages().get()
+        val disabledSourceIds = prefs.disabledSources().get()
+        val pinnedSourceIds = prefs.pinnedSources().get()
         val sourcesSaved = prefs.migrationSources().get().split("/")
         val sources = sourceManager.getVisibleCatalogueSources()
             .filterIsInstance<HttpSource>()
             .filter { it.lang in languages }
-            .sortedBy { "(${it.lang}) ${it.name}" }
+            .filterNot { it.id.toString() in disabledSourceIds }
+            .sortedWith(compareBy({ it.id.toString() !in pinnedSourceIds }, { "${it.name.toLowerCase()} (${it.lang})" }))
 
         return sources.filter { isEnabled(it.id.toString()) }.sortedBy { sourcesSaved.indexOf(it.id.toString()) } + sources.filterNot { isEnabled(it.id.toString()) }
     }
