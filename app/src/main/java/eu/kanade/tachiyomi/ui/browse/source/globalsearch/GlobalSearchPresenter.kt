@@ -112,7 +112,7 @@ open class GlobalSearchPresenter(
         return sourceManager.getVisibleCatalogueSources()
             .filter { it.lang in languages }
             .filterNot { it.id.toString() in disabledSourceIds }
-            .sortedWith(compareBy({ it.id.toString() !in pinnedSourceIds }, { "${it.name.toLowerCase()} (${it.lang})" }))
+            .sortedWith(compareBy({ it.id.toString() !in pinnedSourceIds }, { "(${it.lang}) ${it.name.toLowerCase()}" }))
     }
 
     private fun getSourcesToQuery(): List<CatalogueSource> {
@@ -189,11 +189,8 @@ open class GlobalSearchPresenter(
                     .map { item -> if (item.source == result.source) result else item }
                     .sortedWith(
                         compareBy(
-                            // Bubble up sources that actually have results
-                            { it.results.isNullOrEmpty() },
-                            // Same as initial sort, i.e. pinned first then alphabetically
                             { it.source.id.toString() !in pinnedSourceIds },
-                            { "${it.source.name.toLowerCase()} (${it.source.lang})" }
+                            { "(${it.source.lang}) ${it.source.name.toLowerCase()}" }
                         )
                     )
             }
