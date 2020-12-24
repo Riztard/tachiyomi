@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
+import android.graphics.Color
 import android.view.View
 import androidx.core.view.isVisible
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -39,8 +40,14 @@ class SourceComfortableGridHolder(private val view: View, private val adapter: F
         binding.title.isVisible = hasTitle
         // SY <--
 
-        // Set alpha of thumbnail.
-        binding.thumbnail.alpha = if (manga.favorite) 0.3f else 1.0f
+        // set fav title color // Set alpha of thumbnail.
+        if (manga.favorite) {
+            binding.thumbnail.alpha = 0.3f
+            binding.title.setTextColor(Color.parseColor("#3399ff"))
+        } else {
+            binding.thumbnail.alpha = 1.0f
+            binding.title.setTextColor(Color.WHITE)
+        }
 
         setImage(manga)
     }

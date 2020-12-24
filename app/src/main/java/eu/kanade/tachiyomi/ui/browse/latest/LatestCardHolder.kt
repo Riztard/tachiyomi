@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.browse.latest
 
+import android.graphics.Color
 import android.view.View
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.davidea.viewholders.FlexibleViewHolder
@@ -35,8 +36,15 @@ class LatestCardHolder(view: View, adapter: LatestCardAdapter) :
         binding.card.clipToOutline = true
 
         binding.title.text = manga.title
-        // Set alpha of thumbnail.
-        binding.cover.alpha = if (manga.favorite) 0.3f else 1.0f
+
+        // set fav title color // Set alpha of thumbnail.
+        if (manga.favorite) {
+            binding.cover.alpha = 0.3f
+            binding.title.setTextColor(Color.parseColor("#3399ff"))
+        } else {
+            binding.cover.alpha = 1.0f
+            binding.title.setTextColor(Color.WHITE)
+        }
 
         setImage(manga)
     }
