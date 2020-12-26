@@ -186,39 +186,39 @@
                 <!-- EH -->
                 <data
                     android:host="g.e-hentai.org"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="http" />
                 <data
                     android:host="g.e-hentai.org"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="https" />
                 <data
                     android:host="e-hentai.org"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="http" />
                 <data
                     android:host="e-hentai.org"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="https" />
 
                 <!-- EXH -->
                 <data
                     android:host="exhentai.org"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="http" />
                 <data
                     android:host="exhentai.org"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="https" />
 
                 <!-- nhentai -->
                 <data
                     android:host="nhentai.net"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="http" />
                 <data
                     android:host="nhentai.net"
-                    android:pathPattern="/g/.*"
+                    android:pathPrefix="/g/"
                     android:scheme="https" />
 
                 <!-- Perv Eden -->
@@ -234,57 +234,57 @@
                 <!-- Hentai Cafe -->
                 <data
                     android:host="hentai.cafe"
-                    android:pathPattern="/.*/.*"
+                    android:pathPrefix="/hc.fyi/"
                     android:scheme="http" />
                 <data
                     android:host="hentai.cafe"
-                    android:pathPattern="/.*/.*"
+                    android:pathPrefix="/hc.fyi/"
                     android:scheme="https" />
 
                 <!-- Tsumino -->
                 <data
                     android:host="www.tsumino.com"
-                    android:pathPattern="/Book/Info/.*"
+                    android:pathPrefix="/Book/Info/"
                     android:scheme="http" />
                 <data
                     android:host="www.tsumino.com"
-                    android:pathPattern="/Book/Info/.*"
+                    android:pathPrefix="/Book/Info/"
                     android:scheme="https" />
                 <data
                     android:host="www.tsumino.com"
-                    android:pathPattern="/Read/View/.*"
+                    android:pathPrefix="/Read/View/"
                     android:scheme="http" />
                 <data
                     android:host="www.tsumino.com"
-                    android:pathPattern="/Read/View/.*"
+                    android:pathPrefix="/Read/View/"
                     android:scheme="https" />
 
                  <!-- Hitomi.la -->
                 <data
                     android:host="hitomi.la"
-                    android:pathPattern="/galleries/.*"
+                    android:pathPrefix="/galleries/"
                     android:scheme="http" />
                 <data
                     android:host="hitomi.la"
-                    android:pathPattern="/reader/.*"
+                    android:pathPrefix="/reader/"
                     android:scheme="http" />
                 <data
                     android:host="hitomi.la"
-                    android:pathPattern="/galleries/.*"
+                    android:pathPrefix="/galleries/"
                     android:scheme="https" />
                 <data
                     android:host="hitomi.la"
-                    android:pathPattern="/reader/.*"
+                    android:pathPrefix="/reader/"
                     android:scheme="https" />
 
                 <!-- Pururin.io -->
                 <data
                     android:host="pururin.io"
-                    android:pathPattern="/gallery/.*"
+                    android:pathPrefix="/gallery/"
                     android:scheme="http" />
                 <data
                     android:host="pururin.io"
-                    android:pathPattern="/gallery/.*"
+                    android:pathPrefix="/gallery/"
                     android:scheme="https" />
 
                 <!-- HBrowse -->
@@ -299,36 +299,36 @@
                 <data
                     android:scheme="https"
                     android:host="www.mangadex.org"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPrefix="/manga/" />
                 <data
                     android:scheme="https"
                     android:host="mangadex.org"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPrefix="/manga/" />
                 <data
                     android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPrefix="/manga/" />
                 <data
                     android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPrefix="/manga/" />
 
                 <data
                     android:scheme="https"
                     android:host="www.mangadex.org"
-                    android:pathPattern="/title/..*" />
+                    android:pathPrefix="/title/" />
                 <data
                     android:scheme="https"
                     android:host="mangadex.org"
-                    android:pathPattern="/title/..*" />
+                    android:pathPrefix="/title/" />
                 <data
                     android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/title/..*" />
+                    android:pathPrefix="/title/" />
                 <data
                     android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/title/..*" />
+                    android:pathPrefix="/title/" />
             </intent-filter>
         </activity>
         <activity
