@@ -4,10 +4,12 @@ import android.graphics.Color
 import android.view.View
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.davidea.viewholders.FlexibleViewHolder
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.glide.toMangaThumbnail
 import eu.kanade.tachiyomi.databinding.GlobalSearchControllerCardItemBinding
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 
 class LatestCardHolder(view: View, adapter: LatestCardAdapter) :
@@ -40,7 +42,7 @@ class LatestCardHolder(view: View, adapter: LatestCardAdapter) :
         // set fav title color // Set alpha of thumbnail.
         if (manga.favorite) {
             binding.cover.alpha = 0.3f
-            binding.title.setTextColor(Color.parseColor("#3399ff"))
+            binding.title.setTextColor(itemView.context.getResourceColor(R.attr.colorAccent))
         } else {
             binding.cover.alpha = 1.0f
             binding.title.setTextColor(Color.WHITE)

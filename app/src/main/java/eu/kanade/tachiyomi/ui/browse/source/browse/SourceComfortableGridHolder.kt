@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.glide.toMangaThumbnail
 import eu.kanade.tachiyomi.databinding.SourceComfortableGridItemBinding
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import exh.metadata.metadata.MangaDexSearchMetadata
 import exh.metadata.metadata.base.RaisedSearchMetadata
@@ -43,7 +44,7 @@ class SourceComfortableGridHolder(private val view: View, private val adapter: F
         // set fav title color // Set alpha of thumbnail.
         if (manga.favorite) {
             binding.thumbnail.alpha = 0.3f
-            binding.title.setTextColor(Color.parseColor("#3399ff"))
+            binding.title.setTextColor(itemView.context.getResourceColor(R.attr.colorAccent))
         } else {
             binding.thumbnail.alpha = 1.0f
             binding.title.setTextColor(Color.WHITE)
