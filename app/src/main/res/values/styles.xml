@@ -10,6 +10,10 @@
         <item name="android:textColorPrimary">@color/red</item>
     </style>
 
+    <style name="Theme.Toolbar.MidnightDusk" parent="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/md_white_1000</item>
+    </style>
+
     <style name="Theme.Toolbar.Light" parent="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
         <item name="popupTheme">@style/ThemeOverlay.MaterialComponents.Light</item>
     </style>
@@ -226,6 +230,19 @@
 
     <style name="Theme.Widget.BasicSwitch" parent="Widget.MaterialComponents.CompoundButton.Switch">
         <item name="useMaterialThemeColors">false</item>
+    </style>
+
+
+    <style name="Theme.Widget.CircularProgressIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
+        <item name="indicatorColor">?attr/colorAccent</item>
+    </style>
+    <style name="Theme.Widget.CircularProgressIndicator.Small" parent="Theme.Widget.CircularProgressIndicator">
+        <item name="indicatorSize">16dp</item>
+        <item name="trackThickness">2dp</item>
+    </style>
+
+    <style name="Theme.Widget.LinearProgressIndicator" parent="Widget.MaterialComponents.LinearProgressIndicator">
+        <item name="indicatorColor">?attr/colorAccent</item>
     </style>
 
 

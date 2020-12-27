@@ -154,6 +154,7 @@
     <string name="theme_dark_blue">Dark blue</string>
     <string name="theme_dark_amoled">AMOLED black</string>
     <string name="theme_dark_red">Black-Red</string>
+    <string name="theme_dark_midnightdusk">Midnight Dusk</string>
     <string name="pref_start_screen">Start screen</string>
     <string name="pref_language">Language</string>
     <string name="system_default">Default</string>
@@ -567,8 +568,6 @@
     <string name="status">Status</string>
     <string name="track_status">Status</string>
     <string name="track_start_date">Started</string>
-    <string name="track_started_reading_date">Started reading date</string>
-    <string name="track_finished_reading_date">Finished reading date</string>
     <string name="track_type">Type</string>
     <string name="track_author">Author</string>
     <string name="error_invalid_date_supplied">Invalid date supplied</string>
