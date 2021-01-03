@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.glide.toMangaThumbnail
@@ -80,6 +81,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSettingsSheet
 import eu.kanade.tachiyomi.ui.manga.chapter.DeleteChaptersDialog
 import eu.kanade.tachiyomi.ui.manga.chapter.DownloadCustomChaptersDialog
 import eu.kanade.tachiyomi.ui.manga.chapter.MangaChaptersHeaderAdapter
+import eu.kanade.tachiyomi.ui.manga.chapter.base.BaseChaptersAdapter
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoButtonsAdapter
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoHeaderAdapter
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoItemAdapter
@@ -126,6 +128,7 @@ class MangaController :
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
+    BaseChaptersAdapter.OnChapterClickListener,
     ChangeMangaCoverDialog.Listener,
     ChangeMangaCategoriesDialog.Listener,
     DownloadCustomChaptersDialog.Listener,
@@ -1115,7 +1118,7 @@ class MangaController :
         }
     }
 
-    fun onChapterStatusChange(download: Download) {
+    fun onChapterDownloadUpdate(download: Download) {
         chaptersAdapter?.currentItems?.find { it.id == download.chapter.id }?.let {
             chaptersAdapter?.updateItem(it)
             chaptersAdapter?.notifyDataSetChanged()
@@ -1276,6 +1279,22 @@ class MangaController :
         super.onDetach(view)
     }
 
+    override fun downloadChapter(position: Int) {
+        val item = chaptersAdapter?.getItem(position) ?: return
+        if (item.status == Download.State.ERROR) {
+            DownloadService.start(activity!!)
+        } else {
+            downloadChapters(listOf(item))
+        }
+        chaptersAdapter?.updateItem(item)
+    }
+
+    override fun deleteChapter(position: Int) {
+        val item = chaptersAdapter?.getItem(position) ?: return
+        deleteChapters(listOf(item))
+        chaptersAdapter?.updateItem(item)
+    }
+
     // SELECTION MODE ACTIONS
 
     private fun selectAll() {
@@ -1367,11 +1386,11 @@ class MangaController :
     // OVERFLOW MENU DIALOGS
 
     private fun getUnreadChaptersSorted() = /* SY --> */ if (presenter.source.isEhBasedSource()) presenter.chapters
-        .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
+        .filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }
         .distinctBy { it.name }
         .sortedBy { it.source_order }
     else /* SY <-- */ presenter.chapters
-        .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
+        .filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }
         .distinctBy { it.name }
         .sortedByDescending { it.source_order }
 

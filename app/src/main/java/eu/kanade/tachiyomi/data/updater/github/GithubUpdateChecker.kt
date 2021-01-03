@@ -2,11 +2,18 @@ package eu.kanade.tachiyomi.data.updater.github
 
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.updater.UpdateResult
+import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.network.parseAs
 import exh.syDebugVersion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import uy.kohesive.injekt.injectLazy
 
 class GithubUpdateChecker {
 
-    private val service: GithubService = GithubService.create()
+    private val networkService: NetworkHelper by injectLazy()
 
     private val repo: String by lazy {
         // Sy -->
@@ -19,18 +26,25 @@ class GithubUpdateChecker {
     }
 
     suspend fun checkForUpdate(): UpdateResult {
-        val release = service.getLatestVersion(repo)
-
-        // Check if latest version is different from current version
-        // SY -->
-        val newVersion = release.version
-        return if ((newVersion != BuildConfig.VERSION_NAME && (syDebugVersion == "0")) || ((syDebugVersion != "0") && newVersion != syDebugVersion)) {
-            // SY <--
-            GithubUpdateResult.NewUpdate(release)
-        } else {
-            GithubUpdateResult.NoNewUpdate()
+        return withContext(Dispatchers.IO) {
+            networkService.client
+                .newCall(GET("https://api.github.com/repos/$repo/releases/latest"))
+                .await()
+                .parseAs<GithubRelease>()
+                .let {
+                    // Check if latest version is different from current version
+        			if (/* SY --> */ isNewVersionSY(it.version) /* SY <-- */) {
+						GithubUpdateResult.NewUpdate(it)
+                    } else {
+                        GithubUpdateResult.NoNewUpdate()
+                    }
+                }
         }
     }
+
+    // SY -->
+    private fun isNewVersionSY(versionTag: String) = (versionTag != BuildConfig.VERSION_NAME && (syDebugVersion == "0")) || ((syDebugVersion != "0") && versionTag != syDebugVersion)
+    // SY <--
 
     private fun isNewVersion(versionTag: String): Boolean {
         // Removes prefixes like "r" or "v"

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.CustomMangaManager
@@ -21,6 +22,8 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.toSChapter
+import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.all.MangaDex
 import eu.kanade.tachiyomi.source.online.all.MergedSource
@@ -120,7 +123,8 @@ class MangaPresenter(
     /**
      * Subscription to observe download status changes.
      */
-    private var observeDownloadsSubscription: Subscription? = null
+    private var observeDownloadsStatusSubscription: Subscription? = null
+    private var observeDownloadsPageSubscription: Subscription? = null
 
     // EXH -->
     private val customMangaManager: CustomMangaManager by injectLazy()
@@ -283,14 +287,17 @@ class MangaPresenter(
      */
     fun fetchMangaFromSource(manualFetch: Boolean = false) {
         if (!fetchMangaSubscription.isNullOrUnsubscribed()) return
-        fetchMangaSubscription = Observable.defer { source.fetchMangaDetails(manga) }
-            .map { networkManga ->
-                manga.prepUpdateCover(coverCache, networkManga, manualFetch)
-                manga.copyFrom(networkManga)
+        fetchMangaSubscription = Observable.defer {
+            runAsObservable({
+                val networkManga = source.getMangaDetails(manga.toMangaInfo())
+                val sManga = networkManga.toSManga()
+                manga.prepUpdateCover(coverCache, sManga, manualFetch)
+                manga.copyFrom(sManga)
                 manga.initialized = true
                 db.insertManga(manga).executeAsBlocking()
                 manga
-            }
+            })
+        }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeFirst(
@@ -699,12 +706,20 @@ class MangaPresenter(
         val isMergedSource = source is MergedSource
         val mergedIds = if (isMergedSource) mergedManga.mapNotNull { it.id } else emptyList()
         // SY <--
-        observeDownloadsSubscription?.let { remove(it) }
-        observeDownloadsSubscription = downloadManager.queue.getStatusObservable()
+        observeDownloadsStatusSubscription?.let { remove(it) }
+        observeDownloadsStatusSubscription = downloadManager.queue.getStatusObservable()
             .observeOn(AndroidSchedulers.mainThread())
             .filter { download -> /* SY --> */ if (isMergedSource) download.manga.id in mergedIds else /* SY <-- */ download.manga.id == manga.id }
             .doOnNext { onDownloadStatusChange(it) }
-            .subscribeLatestCache(MangaController::onChapterStatusChange) { _, error ->
+            .subscribeLatestCache(MangaController::onChapterDownloadUpdate) { _, error ->
+                Timber.e(error)
+            }
+
+        observeDownloadsPageSubscription?.let { remove(it) }
+        observeDownloadsPageSubscription = downloadManager.queue.getProgressObservable()
+            .observeOn(AndroidSchedulers.mainThread())
+            .filter { download -> /* SY --> */ if (isMergedSource) download.manga.id in mergedIds else /* SY <-- */ download.manga.id == manga.id }
+            .subscribeLatestCache(MangaController::onChapterDownloadUpdate) { _, error ->
                 Timber.e(error)
             }
     }
@@ -737,7 +752,7 @@ class MangaPresenter(
         // SY <--
         chapters
             .filter { downloadManager.isChapterDownloaded(it, /* SY --> */ if (isMergedSource) mergedManga.firstOrNull { manga -> it.manga_id == manga.id } ?: manga else /* SY <-- */ manga) }
-            .forEach { it.status = Download.DOWNLOADED }
+            .forEach { it.status = Download.State.DOWNLOADED }
     }
 
     /**
@@ -749,7 +764,12 @@ class MangaPresenter(
         if (!fetchChaptersSubscription.isNullOrUnsubscribed()) return
         fetchChaptersSubscription = /* SY --> */ if (source !is MergedSource) {
             // SY <--
-            Observable.defer { source.fetchChapterList(manga) }
+            Observable.defer {
+                runAsObservable({
+                    source.getChapterList(manga.toMangaInfo())
+                        .map { it.toSChapter() }
+                })
+            }
                 .subscribeOn(Schedulers.io())
                 .map { syncChaptersWithSource(db, it, manga, source) }
                 .doOnNext {
@@ -851,7 +871,7 @@ class MangaPresenter(
      */
     private fun onDownloadStatusChange(download: Download) {
         // Assign the download to the model object.
-        if (download.status == Download.QUEUE) {
+        if (download.status == Download.State.QUEUE) {
             chapters.find { it.id == download.chapter.id }?.let {
                 if (it.download == null) {
                     it.download = download
@@ -860,7 +880,7 @@ class MangaPresenter(
         }
 
         // Force UI update if downloaded filter active and download finished.
-        if (onlyDownloaded() != State.IGNORE && download.status == Download.DOWNLOADED) {
+        if (onlyDownloaded() != State.IGNORE && download.status == Download.State.DOWNLOADED) {
             refreshChapters()
         }
     }
@@ -892,7 +912,7 @@ class MangaPresenter(
         }
 
         launchIO {
-            db.updateChaptersProgress(chapters).executeAsBlocking()
+            db.updateChaptersProgress(chapters).await()
 
             if (preferences.removeAfterMarkedAsRead() /* SY --> */ && manga.shouldDeleteChapters(db, preferences) /* SY <-- */) {
                 deleteChapters(chapters)
@@ -919,14 +939,13 @@ class MangaPresenter(
      * @param selectedChapters the list of chapters to bookmark.
      */
     fun bookmarkChapters(selectedChapters: List<ChapterItem>, bookmarked: Boolean) {
-        Observable.from(selectedChapters)
-            .doOnNext { chapter ->
-                chapter.bookmark = bookmarked
-            }
-            .toList()
-            .flatMap { db.updateChaptersProgress(it).asRxObservable() }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        launchIO {
+            selectedChapters
+                .forEach {
+                    it.bookmark = bookmarked
+                    db.updateChapterProgress(it).await()
+                }
+        }
     }
 
     /**
@@ -934,36 +953,30 @@ class MangaPresenter(
      * @param chapters the list of chapters to delete.
      */
     fun deleteChapters(chapters: List<ChapterItem>) {
-        Observable.just(chapters)
-            .doOnNext { deleteChaptersInternal(chapters) }
-            .doOnNext { if (onlyDownloaded() != State.IGNORE) refreshChapters() }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst(
-                { view, _ ->
-                    view.onChaptersDeleted(chapters)
-                },
-                MangaController::onChaptersDeletedError
-            )
+        launchIO {
+            try {
+                downloadManager.deleteChapters(chapters, manga, source).forEach {
+                    if (it is ChapterItem) {
+                        it.status = Download.State.NOT_DOWNLOADED
+                        it.download = null
+                    }
+                }
+
+                if (onlyDownloaded() != State.IGNORE) {
+                    refreshChapters()
+                }
+
+                view?.onChaptersDeleted(chapters)
+            } catch (e: Throwable) {
+                view?.onChaptersDeletedError(e)
+            }
+        }
     }
 
     private fun downloadNewChapters(chapters: List<Chapter>) {
         if (chapters.isEmpty() || !manga.shouldDownloadNewChapters(db, preferences) || source.isEhBasedSource()) return
 
         downloadChapters(chapters)
-    }
-
-    /**
-     * Deletes a list of chapters from disk. This method is called in a background thread.
-     * @param chapters the chapters to delete.
-     */
-    private fun deleteChaptersInternal(chapters: List<ChapterItem>) {
-        downloadManager.deleteChapters(chapters, manga, source).forEach {
-            if (it is ChapterItem) {
-                it.status = Download.NOT_DOWNLOADED
-                it.download = null
-            }
-        }
     }
 
     /**
