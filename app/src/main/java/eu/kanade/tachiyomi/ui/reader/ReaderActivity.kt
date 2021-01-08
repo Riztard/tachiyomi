@@ -24,6 +24,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
+import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.elvishew.xlog.XLog
@@ -70,15 +71,15 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import exh.util.defaultReaderType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.launch
 import nucleus.factory.RequiresPresenter
 import reactivecircus.flowbinding.android.view.clicks
 import reactivecircus.flowbinding.android.widget.checkedChanges
@@ -121,7 +122,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
     // SY -->
     private var ehUtilsVisible = false
 
-    private var autoscrollScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
+    private val autoScrollFlow = MutableSharedFlow<Unit>()
     private var autoScrollJob: Job? = null
     private val sourceManager: SourceManager by injectLazy()
 
@@ -218,19 +219,12 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         if (interval == -1.0) return
 
         val duration = interval.seconds
-        autoScrollJob =
-            flow {
-                while (true) {
-                    delay(duration)
-                    emit(Unit)
-                }
-            }.onEach {
-                viewer.let { v ->
-                    if (v is PagerViewer) v.moveToNext()
-                    else if (v is WebtoonViewer) v.scrollDown()
-                }
+        autoScrollJob = lifecycleScope.launch(Dispatchers.IO) {
+            while (true) {
+                delay(duration)
+                autoScrollFlow.emit(Unit)
             }
-                .launchIn(autoscrollScope)
+        }
     }
     // SY <--
 
@@ -428,7 +422,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                 ehUtilsVisible = !ehUtilsVisible
                 setEhUtilsVisibility(ehUtilsVisible)
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehAutoscrollFreq.setText(
             preferences.autoscrollInterval().get().let {
@@ -450,7 +444,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     }
                 )
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehAutoscrollFreq.textChanges()
             .onEach {
@@ -468,7 +462,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     setupAutoscroll(if (binding.ehAutoscroll.isChecked) parsed else -1.0)
                 }
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehAutoscrollHelp.clicks()
             .onEach {
@@ -478,7 +472,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     .positiveButton(android.R.string.ok)
                     .show()
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehRetryAll.clicks()
             .onEach {
@@ -522,7 +516,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
 
                 toast("Retrying $retried failed pages...")
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehRetryAllHelp.clicks()
             .onEach {
@@ -532,7 +526,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     .positiveButton(android.R.string.ok)
                     .show()
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehBoostPage.clicks()
             .onEach {
@@ -559,7 +553,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     }
                 }
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.ehBoostPageHelp.clicks()
             .onEach {
@@ -569,14 +563,14 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     .positiveButton(android.R.string.ok)
                     .show()
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         chapterBottomSheet = ReaderChapterSheet(this)
         binding.chaptersButton.clicks()
             .onEach {
                 chapterBottomSheet.show()
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
 
         binding.toolbar.clicks()
             .onEach {
@@ -589,7 +583,16 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     )
                 }
             }
-            .launchIn(scope)
+            .launchIn(lifecycleScope)
+
+        autoScrollFlow
+            .onEach {
+                viewer.let { v ->
+                    if (v is PagerViewer) v.moveToNext()
+                    else if (v is WebtoonViewer) v.scrollDown()
+                }
+            }
+            .launchIn(lifecycleScope)
         // <-- EH
 
         // Set initial visibility
@@ -964,42 +967,42 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                     delay(250)
                     setOrientation(it)
                 }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             preferences.readerTheme().asFlow()
                 .drop(1) // We only care about updates
                 .onEach { recreate() }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             preferences.showPageNumber().asFlow()
                 .onEach { setPageNumberVisibility(it) }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             preferences.trueColor().asFlow()
                 .onEach { setTrueColor(it) }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 preferences.cutoutShort().asFlow()
                     .onEach { setCutoutShort(it) }
-                    .launchIn(scope)
+                    .launchIn(lifecycleScope)
             }
 
             preferences.keepScreenOn().asFlow()
                 .onEach { setKeepScreenOn(it) }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             preferences.customBrightness().asFlow()
                 .onEach { setCustomBrightness(it) }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             preferences.colorFilter().asFlow()
                 .onEach { setColorFilter(it) }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
 
             preferences.colorFilterMode().asFlow()
                 .onEach { setColorFilter(preferences.colorFilter().get()) }
-                .launchIn(scope)
+                .launchIn(lifecycleScope)
         }
 
         /**
@@ -1077,7 +1080,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                 preferences.customBrightnessValue().asFlow()
                     .sample(100)
                     .onEach { setCustomBrightnessValue(it) }
-                    .launchIn(scope)
+                    .launchIn(lifecycleScope)
             } else {
                 setCustomBrightnessValue(0)
             }
@@ -1091,7 +1094,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
                 preferences.colorFilterValue().asFlow()
                     .sample(100)
                     .onEach { setColorFilterValue(it) }
-                    .launchIn(scope)
+                    .launchIn(lifecycleScope)
             } else {
                 binding.colorOverlay.isVisible = false
             }

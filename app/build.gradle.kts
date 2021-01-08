@@ -74,7 +74,7 @@ android {
             //isMinifyEnabled = true
             //isShrinkResources = true
             isZipAlignEnabled = true
-            setProguardFiles(listOf("proguard-rules.pro"))
+            setProguardFiles(listOf(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"))
         }
         named("release") {
             isMinifyEnabled = true
@@ -179,11 +179,6 @@ dependencies {
     // TLS 1.3 support for Android < 10
     implementation("org.conscrypt:conscrypt-android:2.5.1")
 
-    // REST
-    val retrofitVersion = "2.9.0"
-    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
-
     // JSON
     val kotlinSerializationVersion = "1.0.1"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
@@ -225,7 +220,7 @@ dependencies {
     implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
     kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
-    implementation("com.github.tachiyomiorg:subsampling-scale-image-view:6caf219")
+    implementation("com.github.tachiyomiorg:subsampling-scale-image-view:683808b")
 
     // Logging
     implementation("com.jakewharton.timber:timber:4.7.1")
@@ -243,7 +238,7 @@ dependencies {
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
-    implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
+    implementation("com.github.tachiyomiorg:DirectionalViewPager:7d0617d")
 
     // 3.2.0+ introduces weird UI blinking or cut off issues on some devices
     val materialDialogsVersion = "3.1.1"
@@ -286,7 +281,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
     // For detecting memory leaks; see https://square.github.io/leakcanary/
-//    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.4")
+    // debugImplementation("com.squareup.leakcanary:leakcanary-android:2.6")
 
     // SY -->
     // [EXH] Android 7 SSL Workaround
@@ -331,6 +326,7 @@ tasks {
             "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
             "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
             "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
             "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
         )
     }

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.text.HtmlCompat
-import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -27,6 +26,7 @@ import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.RandomMangaSource
 import eu.kanade.tachiyomi.source.online.UrlImportableSource
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.lang.asObservable
@@ -114,7 +114,7 @@ class MangaDex(delegate: HttpSource, val context: Context) :
     override fun mapUrlToChapterUrl(uri: Uri): String? {
         if (!uri.pathSegments.firstOrNull().equals("chapter", true)) return null
         val id = uri.pathSegments.getOrNull(1) ?: return null
-        return MdUtil.apiChapter + id
+        return MdUtil.apiChapterOld + id
     }
 
     override suspend fun mapChapterUrlToMangaUrl(uri: Uri): String? {
@@ -165,7 +165,7 @@ class MangaDex(delegate: HttpSource, val context: Context) :
     }
 
     override fun parseIntoMetadata(metadata: MangaDexSearchMetadata, input: Response) {
-        ApiMangaParser(listOf(mdLang)).parseIntoMetadata(metadata, input, preferences.mangaDexForceLatestCovers().get())
+        ApiMangaParser(listOf(mdLang)).parseIntoMetadata(metadata, input, emptyList())
     }
 
     override suspend fun fetchFollows(): MangasPage {
@@ -267,7 +267,7 @@ class MangaDex(delegate: HttpSource, val context: Context) :
         return withContext(Dispatchers.IO) { FollowsHandler(client, headers, Injekt.get(), useLowQualityThumbnail()).updateFollowStatus(mangaID, followStatus) }
     }
 
-    override fun getFilterHeader(controller: Controller): MangaDexFabHeaderAdapter {
+    override fun getFilterHeader(controller: BaseController<*>): MangaDexFabHeaderAdapter {
         return MangaDexFabHeaderAdapter(controller, this)
     }
 

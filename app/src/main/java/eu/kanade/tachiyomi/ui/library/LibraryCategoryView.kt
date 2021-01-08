@@ -25,7 +25,7 @@ import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import exh.ui.LoadingHandle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
@@ -52,7 +52,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     CategoryAdapter.OnItemReleaseListener {
     // SY <--
 
-    private val scope = CoroutineScope(Job() + Dispatchers.Main)
+    private val scope = MainScope()
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -233,7 +233,12 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         unsubscribe()
     }
 
-    fun unsubscribe() {
+    fun onDestroy() {
+        unsubscribe()
+        scope.cancel()
+    }
+
+    private fun unsubscribe() {
         subscriptions.clear()
         // EXH -->
         supervisorScope.cancel()

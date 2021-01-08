@@ -21,9 +21,6 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.shrinkOnScroll
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import reactivecircus.flowbinding.android.view.clicks
 
 /**
  * Controller to manage the categories for the users' library.
@@ -99,14 +96,13 @@ class RepoController :
         actionFab = fab
         fab.setText(R.string.action_add)
         fab.setIconResource(R.drawable.ic_add_24dp)
-        fab.clicks()
-            .onEach {
-                RepoCreateDialog(this@RepoController).showDialog(router, null)
-            }
-            .launchIn(scope)
+        fab.setOnClickListener {
+            RepoCreateDialog(this@RepoController).showDialog(router, null)
+        }
     }
 
     override fun cleanupFab(fab: ExtendedFloatingActionButton) {
+        fab.setOnClickListener(null)
         actionFabScrollListener?.let { binding.recycler.removeOnScrollListener(it) }
         actionFab = null
     }

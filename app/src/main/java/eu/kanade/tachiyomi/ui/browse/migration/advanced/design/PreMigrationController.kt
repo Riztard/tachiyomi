@@ -27,12 +27,6 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.browse.migration.advanced.process.MigrationListController
 import eu.kanade.tachiyomi.ui.browse.migration.advanced.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.util.view.shrinkOnScroll
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import reactivecircus.flowbinding.android.view.clicks
 import uy.kohesive.injekt.injectLazy
 
 class PreMigrationController(bundle: Bundle? = null) :
@@ -46,8 +40,6 @@ class PreMigrationController(bundle: Bundle? = null) :
     private var adapter: MigrationSourceAdapter? = null
 
     private val config: LongArray = args.getLongArray(MANGA_IDS_EXTRA) ?: LongArray(0)
-
-    val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     private var actionFab: ExtendedFloatingActionButton? = null
     private var actionFabScrollListener: RecyclerView.OnScrollListener? = null
@@ -83,25 +75,24 @@ class PreMigrationController(bundle: Bundle? = null) :
         actionFab = fab
         fab.setText(R.string.action_migrate)
         fab.setIconResource(R.drawable.ic_arrow_forward_24dp)
-        fab.clicks()
-            .onEach {
-                if (dialog?.isShowing != true) {
-                    dialog = MigrationBottomSheetDialog(activity!!, R.style.SheetDialog, this)
-                    dialog?.show()
-                    val bottomSheet = dialog?.findViewById<FrameLayout>(
-                        com.google.android.material.R.id.design_bottom_sheet
-                    )
-                    if (bottomSheet != null) {
-                        val behavior: BottomSheetBehavior<*> = BottomSheetBehavior.from(bottomSheet)
-                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                        behavior.skipCollapsed = true
-                    }
+        fab.setOnClickListener {
+            if (dialog?.isShowing != true) {
+                dialog = MigrationBottomSheetDialog(activity!!, R.style.SheetDialog, this)
+                dialog?.show()
+                val bottomSheet = dialog?.findViewById<FrameLayout>(
+                    com.google.android.material.R.id.design_bottom_sheet
+                )
+                if (bottomSheet != null) {
+                    val behavior: BottomSheetBehavior<*> = BottomSheetBehavior.from(bottomSheet)
+                    behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    behavior.skipCollapsed = true
                 }
             }
-            .launchIn(scope)
+        }
     }
 
     override fun cleanupFab(fab: ExtendedFloatingActionButton) {
+        fab.setOnClickListener(null)
         actionFabScrollListener?.let { binding.recycler.removeOnScrollListener(it) }
         actionFab = null
     }

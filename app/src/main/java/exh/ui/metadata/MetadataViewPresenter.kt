@@ -15,7 +15,6 @@ import exh.ui.base.CoroutinePresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.plus
 import uy.kohesive.injekt.Injekt
@@ -41,13 +40,13 @@ class MetadataViewPresenter(
                     meta.value = it.raise(mainSource.metaClass)
                 }
             }
-            .launchIn(scope + Dispatchers.IO)
+            .launchUnderContext(Dispatchers.IO)
 
         meta
-            .onEachView { view, metadata ->
+            .inView { view, metadata ->
                 view.onNextMangaInfo(metadata)
             }
-            .launchIn(scope)
+            .launch()
     }
 
     private fun getMangaMetaObservable(): Flow<FlatMetadata?> {

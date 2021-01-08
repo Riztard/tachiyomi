@@ -2,8 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="28dp"
-    android:layout_height="28dp"
+    android:layout_width="44dp"
+    android:layout_height="44dp"
+    android:padding="8dp"
     android:background="?selectableItemBackgroundBorderless">
 
     <ImageView
@@ -45,7 +46,7 @@
         android:scaleType="fitXY"
         android:visibility="gone"
         app:srcCompat="@drawable/ic_check_circle_24dp"
-        app:tint="#006400"
+        app:tint="?android:attr/textColorPrimary"
         tools:ignore="ContentDescription" />
 
     <ImageView
