@@ -60,7 +60,7 @@
         android:scaleType="fitXY"
         android:visibility="gone"
         app:srcCompat="@drawable/ic_check_circle_24dp"
-        app:tint="?android:attr/textColorPrimary"
+        app:tint="#0e5142"
         tools:ignore="ContentDescription" />
 
     <ImageView
