@@ -25,6 +25,13 @@ if (!gradle.startParameter.taskRequests.toString().contains("Debug")) {
 shortcutHelper.setFilePath("./shortcuts.xml")
 
 android {
+    signingConfigs {
+        create("123456") {
+            storePassword = "123456"
+            keyAlias = "123456"
+            keyPassword = "123456"
+        }
+    }
     compileSdkVersion(AndroidConfig.compileSdk)
     buildToolsVersion(AndroidConfig.buildTools)
     ndkVersion = AndroidConfig.ndk
@@ -34,8 +41,8 @@ android {
         minSdkVersion(AndroidConfig.minSdk)
         targetSdkVersion(AndroidConfig.targetSdk)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 13
-        versionName = "1.5.0"
+        versionCode = 12
+        versionName = "6.9.1"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
