@@ -165,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="5dp"
                 android:layout_gravity="bottom"
                 android:gravity="center"
                 android:orientation="horizontal"
@@ -238,7 +238,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
+                android:layout_height="50dp"
                 android:layout_gravity="bottom"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
