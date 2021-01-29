@@ -15,6 +15,7 @@
         android:scaleType="fitXY"
         app:srcCompat="@drawable/border_circle"
         app:tint="?android:attr/textColorHint"
+        app:tint="?attr/colorAccent"
         tools:ignore="ContentDescription" />
 
     <ImageView
@@ -25,6 +26,7 @@
         android:scaleType="fitXY"
         app:srcCompat="@drawable/ic_arrow_downward_24dp"
         app:tint="?android:attr/textColorHint"
+        app:tint="?attr/colorAccent"
         tools:ignore="ContentDescription" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -35,6 +37,7 @@
         android:padding="1dp"
         android:visibility="gone"
         app:indicatorColor="?android:attr/textColorHint"
+        app:indicatorColor="?attr/colorAccent"
         app:indicatorInset="0dp"
         app:indicatorSize="24dp"
         app:trackThickness="2dp" />
@@ -46,7 +49,7 @@
         android:scaleType="fitXY"
         android:visibility="gone"
         app:srcCompat="@drawable/ic_check_circle_24dp"
-        app:tint="#0e5142"
+        app:tint="?android:attr/textColorPrimary"
         tools:ignore="ContentDescription" />
 
     <ImageView
