@@ -37,7 +37,7 @@ android {
     ndkVersion = AndroidConfig.ndk
 
     defaultConfig {
-        applicationId = "eu.kanade.tachiyomi.sy"
+        applicationId = "eu.kanade.tachiyomi.sy.riztard"
         minSdkVersion(AndroidConfig.minSdk)
         targetSdkVersion(AndroidConfig.targetSdk)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
