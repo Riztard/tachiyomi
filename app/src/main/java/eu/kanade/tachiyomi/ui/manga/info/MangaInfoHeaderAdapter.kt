@@ -157,10 +157,7 @@ class MangaInfoHeaderAdapter(
 
             binding.mangaFullTitle.longClicks()
                 .onEach {
-                    controller.activity?.copyToClipboard(
-                        view.context.getString(R.string.title),
-                        binding.mangaFullTitle.text.toString()
-                    )
+                    controller.performSearch(binding.mangaFullTitle.text.toString())
                 }
                 .launchIn(controller.viewScope)
 
