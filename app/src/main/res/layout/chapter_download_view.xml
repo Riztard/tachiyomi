@@ -33,7 +33,7 @@
         android:layout_height="match_parent"
         android:padding="1dp"
         android:visibility="gone"
-        app:indicatorColor="?android:attr/textColorHint"
+        app:indicatorColor="#0e5142"
         app:indicatorInset="0dp"
         app:indicatorSize="24dp"
         app:trackThickness="2dp" />
