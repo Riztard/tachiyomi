@@ -150,6 +150,14 @@
                 android:layout_height="wrap_content"
                 android:padding="0dp"
                 app:srcCompat="@drawable/ic_keyboard_arrow_down_white_32dp" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <LinearLayout
+            android:id="@+id/reader_menu_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom">
 
             <LinearLayout
                 android:id="@+id/reader_nav"
@@ -227,15 +235,6 @@
                     android:tint="?attr/colorOnPrimary" />
 
             </LinearLayout>
-
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <LinearLayout
-            android:id="@+id/reader_menu_bottom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="bottom">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
